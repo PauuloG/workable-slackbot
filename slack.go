@@ -24,8 +24,8 @@ var attachmentsEmojis = []string{
 }
 
 type SlackMessage struct {
-	Username      string `json:"username"`
-	IconEmoji     string `json:"icon_emoji"`
+	// Username      string `json:"username"`
+	// IconEmoji     string `json:"icon_emoji"`
 	Text					string `json:"text"`
 	Channel 			string `json:"channel"`
 	Token					string `json:"token"`
@@ -45,8 +45,8 @@ type SlackAttachmentField struct {
 
 func GetDefaultSlackMessage() SlackMessage {
 	var slackMessage SlackMessage
-	slackMessage.Username = slackUsername
-	slackMessage.IconEmoji = slackEmoji
+	// slackMessage.Username = slackUsername
+	// slackMessage.IconEmoji = slackEmoji
 	slackMessage.Channel = slackChannel
 
 	return slackMessage
