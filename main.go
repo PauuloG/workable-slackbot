@@ -20,6 +20,7 @@ var slackUsername string
 var slackEmoji string
 var slackMessageNew string
 var slackMessageAll string
+var slackMessageAllPost string
 
 func init() {
 	err := godotenv.Load("/go/bin/.env")
@@ -35,6 +36,7 @@ func init() {
 	slackEmoji = os.Getenv("SLACK_EMOJI")
 	slackMessageNew = os.Getenv("SLACK_MESSAGE_NEW")
 	slackMessageAll = os.Getenv("SLACK_MESSAGE_ALL")
+	slackMessageAllPost = os.Getenv("SLACK_MESSAGE_ALL_POST")
 
 	if s, err := strconv.Atoi(os.Getenv("WORKABLE_LAST_POSTED_THRESHOLD")); err == nil {
 		workableLastPostedTreshold = int(s)
@@ -110,4 +112,6 @@ func NotifyAllJobs() {
 
 	message := GetAllJobsSlackMessage(jobs)
 	SendMessage(message)
+	postMessage := GetAllJobsSlackPostMessage()
+	SendMessage(postMessage)
 }

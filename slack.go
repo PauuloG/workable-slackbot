@@ -92,6 +92,14 @@ func GetAllJobsSlackMessage(jobs workableJobs) SlackMessage {
 	return message
 }
 
+func GetAllJobsSlackPostMessage () SlackMessage {
+
+	slackMessage := GetDefaultSlackMessage()
+	slackMessage.Text = slackMessageAllPost
+
+	return slackMessage
+}
+
 func SendMessage(message SlackMessage) []byte {
 
 	message.Token = slackToken
