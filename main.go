@@ -104,6 +104,7 @@ func NotifyNewJob() {
 			fired = true
 			message := GetSingleJobSlackMessage(job)
 			SendMessage(message)
+			break
 	  }
 
 		if (job.Id == workableLastSentId) {
