@@ -4,8 +4,8 @@ import (
   "fmt"
   "log"
 	"os"
-	"time"
-	"strconv"
+	"io/ioutil"
+	"regexp"
 
 	"github.com/urfave/cli"
 	"github.com/joho/godotenv"
@@ -13,7 +13,7 @@ import (
 
 var workableUrl string
 var workableToken string
-var workableLastPostedTreshold int
+var workableLastSentId string
 var slackToken string
 var slackChannel string
 var slackUsername string
@@ -30,6 +30,7 @@ func init() {
 
   workableUrl = os.Getenv("WORKABLE_URL")
 	workableToken = os.Getenv("WORKABLE_TOKEN")
+	workableLastSentId = os.Getenv("WORKABLE_LAST_SENT_ID")
 	slackToken = os.Getenv("SLACK_TOKEN")
 	slackChannel = os.Getenv("SLACK_CHANNEL")
 	slackUsername = os.Getenv("SLACK_USERNAME")
@@ -37,10 +38,6 @@ func init() {
 	slackMessageNew = os.Getenv("SLACK_MESSAGE_NEW")
 	slackMessageAll = os.Getenv("SLACK_MESSAGE_ALL")
 	slackMessageAllPost = os.Getenv("SLACK_MESSAGE_ALL_POST")
-
-	if s, err := strconv.Atoi(os.Getenv("WORKABLE_LAST_POSTED_THRESHOLD")); err == nil {
-		workableLastPostedTreshold = int(s)
-	}
 }
 
 func main() {
@@ -80,28 +77,41 @@ func NotifyNewJob() {
 	fmt.Println("Fetching new job offers from Workable")
 	jobs := GetWorkableJobs()
 	fired := false
-	for _, job := range jobs.Jobs {
-		loc, _ := time.LoadLocation("UTC")
-		// setup a start and end time
-		createdAt := job.CreatedAt.In(loc)
-		now := time.Now().In(loc)
+	matched := false
 
-		// get the diff
-		diff := now.Sub(createdAt)
-		diffMinutes := int(diff.Minutes())
+	for _, job := range jobs.Jobs {
 
 		// Debug line
-		fmt.Printf("%s - %v \n", job.Title, diffMinutes)
+		fmt.Printf("%s - %s \n", job.Title, job.Id)
 
-		if diffMinutes < workableLastPostedTreshold {
-			fmt.Printf("Notifying users for job \"%s\" (%s) - posted on %v \n", job.Title, job.Id, job.CreatedAt)
+		if (matched) {
+			dotEnvContent, err := ioutil.ReadFile("/go/bin/.env")
+			if err != nil {
+				panic(err)
+			}
+
+			regex := regexp.MustCompile(`WORKABLE_LAST_SENT_ID=(.*)`)
+			dotEnvContentString := string(dotEnvContent[:])
+			dotEnvNewContentString := regex.ReplaceAllString(dotEnvContentString, fmt.Sprintf("WORKABLE_LAST_SENT_ID=%s", job.Id))
+
+			fmt.Printf("Writing job %s id %s to .env \n", job.Title, job.Id)
+
+			err = ioutil.WriteFile("/go/bin/.env", []byte(dotEnvNewContentString), 0)
+			if err != nil {
+				panic(err)
+			}
+
+			fired = true
 			message := GetSingleJobSlackMessage(job)
 			SendMessage(message)
-			fired = true
+	  }
+
+		if (job.Id == workableLastSentId) {
+			matched = true
 		}
-	}
+  }
 	if !fired {
-		fmt.Printf("No job matching notification criterias %v (%v older jobs found)\n", workableLastPostedTreshold, len(jobs.Jobs))
+		fmt.Printf("No new job found (%v older jobs found)\n", len(jobs.Jobs))
 	}
 }
 
