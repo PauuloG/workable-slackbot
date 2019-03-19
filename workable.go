@@ -24,7 +24,35 @@ type workableJob struct {
 func GetWorkableJobs() workableJobs {
 	client := &http.Client {}
 
-	req, err := http.NewRequest("GET", workableUrl, nil)
+	req, err := http.NewRequest("GET", workableOpenUrl, nil)
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", workableToken))
+	res, err := client.Do(req)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var jobs workableJobs
+	err = json.Unmarshal(body, &jobs)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return jobs
+}
+
+func GetWorkableArchivedJobs() workableJobs {
+	client := &http.Client {}
+
+	req, err := http.NewRequest("GET", workableArchivedUrl, nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", workableToken))
 	res, err := client.Do(req)
 

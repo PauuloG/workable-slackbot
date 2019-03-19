@@ -62,6 +62,15 @@ func GetSingleJobSlackMessage(job workableJob) SlackMessage {
 	return slackMessage
 }
 
+func GetArchivedJobSlackMessage(job workableJob) SlackMessage {
+	messageString := fmt.Sprintf(slackMessageArchived, job.Department, job.Title)
+
+	slackMessage := GetDefaultSlackMessage()
+	slackMessage.Text = messageString
+
+	return slackMessage
+}
+
 func GetAllJobsSlackMessage(jobs workableJobs) SlackMessage {
 	messageString := fmt.Sprintf(slackMessageAll)
 
@@ -92,7 +101,7 @@ func GetAllJobsSlackMessage(jobs workableJobs) SlackMessage {
 	return message
 }
 
-func GetAllJobsSlackPostMessage () SlackMessage {
+func GetAllJobsSlackPostMessage() SlackMessage {
 
 	slackMessage := GetDefaultSlackMessage()
 	slackMessage.Text = slackMessageAllPost
