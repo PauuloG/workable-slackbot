@@ -107,7 +107,7 @@ func NotifyNewJob() {
 
 			regex := regexp.MustCompile(`WORKABLE_LAST_SENT_ID=(.*)`)
 			dotEnvContentString := string(dotEnvContent[:])
-			dotEnvNewContentString := regex.ReplaceAllString(dotEnvContentString, fmt.Sprintf("WORKABLE_ARCHIVED_LAST_SENT_ID=%s", job.Id))
+			dotEnvNewContentString := regex.ReplaceAllString(dotEnvContentString, fmt.Sprintf("WORKABLE_OPEN_LAST_SENT_ID=%s", job.Id))
 
 			fmt.Printf("Writing job %s id %s to .env \n", job.Title, job.Id)
 
